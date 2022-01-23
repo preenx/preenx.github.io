@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Calculator</title>
+        <style>
+            html {
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                background: linear-gradient(60deg, blue, 20%, purple);
+            }
+            .cards-stack {
+                position: absolute;
+                transform: translate(-50%, -50%) skewY(20deg);
+                top: 50%;
+                left: 50%;
+                transition: 0.4s;
+                user-select: none;
+                -moz-user-select: none;
+                -khtml-user-select: none;
+                -webkit-user-select: none;
+                -o-user-select: none;
+            }
+            .card {
+                position: absolute;
+                width: 250px;
+                height: 450px;
+                transform: translate(
+                    calc(-50% + var(--i) * 60px),
+                    calc(-50% - var(--i) * 50px)
+                );
+                top: 50%;
+                left: 50%;
+                background: #fff2;
+                border-radius: 10px;
+                grid-template-columns: repeat(4, 1fr);
+                display: grid;
+                transition: inherit;
+                border-top: 1px solid #ccc;
+                border-right: 1px solid #aaa;
+                padding: 25px;
+                box-shadow: 3px -3px 5px #fff3;
+            }
+            .card:nth-child(n + 2) {
+                opacity: 0.7;
+            }
+            .cards-stack:hover {
+                transform: translate(-50%, -50%);
+            }
+            .cards-stack:hover .card {
+                transform: translate(-50%, -50%);
+                width: 460px;
+                height: 710px;
+                border: 1px solid #aaaa;
+                padding: 45px;
+            }
+            .cards-stack:hover .card:nth-child(n + 2) {
+                opacity: 0;
+            }
+            .cards-stack:hover .spot {
+                background: #fff6;
+                border-radius: 10px;
+            }
+            .spot {
+                background: #fff4;
+                transition: inherit;
+                margin: 5px;
+                border-radius: 7px;
+                font-family: Consolas;
+                color: #0005;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #output {
+                grid-column: span 4;
+                background: #0004;
+                justify-content: flex-end;
+                padding: 30px;
+                color: #fff6;
+            }
+            .cards-stack:hover .spot {
+                font-size: 32px;
+                color: #000a;
+            }
+            .cards-stack:hover #output {
+                border-radius: 10px;
+                background: #0009;
+                padding: 40px;
+                color: #fff9;
+            }
+            .special {
+                background: #fb06;
+            }
+            .cards-stack:hover .special {
+                border-radius: 10px;
+                background: #fb0a;
+            }
+            .cards-stack:hover .spot:active {
+                transition: 0s;
+                background: #fffa;
+            }
+            .cards-stack:hover #output:active {
+                transition: 0s;
+                background: #0009;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="cards-stack">
+            <div class="card" style="--i: -2; z-index: 10">
+                <div class="spot" id="output">0</div>
+                <div class="spot special">C</div>
+                <div class="spot special">(</div>
+                <div class="spot special">)</div>
+                <div class="spot special">←</div>
+                <div class="spot">7</div>
+                <div class="spot">8</div>
+                <div class="spot">9</div>
+                <div class="spot special">÷</div>
+                <div class="spot">4</div>
+                <div class="spot">5</div>
+                <div class="spot">6</div>
+                <div class="spot special">×</div>
+                <div class="spot">1</div>
+                <div class="spot">2</div>
+                <div class="spot">3</div>
+                <div class="spot special">-</div>
+                <div class="spot special">.</div>
+                <div class="spot">0</div>
+                <div class="spot special">=</div>
+                <div class="spot special">+</div>
+            </div>
+            <div class="card" style="--i: -1"></div>
+            <div class="card" style="--i: 0"></div>
+            <div class="card" style="--i: 1"></div>
+            <div class="card" style="--i: 2"></div>
+        </div>
+        <script>
+            let output = document.getElementById("output");
+            for (const button of document.querySelectorAll(".spot")) {
+                if (button.id !== "output") {
+                    button.addEventListener("click", (event) => {
+                        const symbol = event.target.innerText;
+                        switch (symbol) {
+                            case "=":
+                                try {
+                                    output.innerText = eval(output.innerText);
+                                } catch {
+                                    output.innerText = "error";
+                                }
+                                break;
+                            case "←":
+                                output.innerText = output.innerText.slice(
+                                    0,
+                                    -1
+                                );
+                                break;
+                            case "×":
+                                output.innerText += "*";
+                                break;
+                            case "÷":
+                                output.innerText += "/";
+                                break;
+                            case "C":
+                                output.innerText = "0";
+                                break;
+                            default:
+                                output.innerText += symbol;
+                        }
+                        if (
+                            output.innerText.length > 5 &&
+                            output.innerText.startsWith("error")
+                        ) {
+                            output.innerText = output.innerText.slice(5);
+                        }
+                        if (
+                            output.innerText.length > 1 &&
+                            output.innerText[0] === "0" &&
+                            "0987654321()".includes(output.innerText[1])
+                        ) {
+                            output.innerText = output.innerText.slice(1);
+                        }
+                        if (
+                            output.innerText.length > 2 &&
+                            ".+-/*".includes(output.innerText.slice(-2)[0]) &&
+                            ".+-/*()".includes(output.innerText.slice(-1)[0])
+                        ) {
+                            output.innerText =
+                                output.innerText.slice(0, -2) +
+                                output.innerText.slice(-1)[0];
+                        }
+                        if (output.innerText === "") {
+                            output.innerText = "0";
+                        }
+                        output.innerText = output.innerText.replace(
+                            "NaN",
+                            "error"
+                        );
+                        if (output.innerText.length > 21) {
+                            output.innerText = "error";
+                        }
+                    });
+                }
+            }
+        </script>
+    </body>
+</html>
